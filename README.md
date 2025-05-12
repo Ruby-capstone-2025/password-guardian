@@ -1,6 +1,6 @@
 # Password Guardian
 
-A Ruby CLI tool used to evaluate password strength, check password breaches via the HaveIBeenPwned API, and generate or strengthen passwords.
+A lightweight Ruby CLI tool used to evaluate password strength, check password breaches via the HaveIBeenPwned API, and generate or strengthen passwords.
 
 ## Prerequisites
 
