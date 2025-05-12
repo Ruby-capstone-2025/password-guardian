@@ -1,0 +1,7 @@
+# Gemfile
+source 'https://rubygems.org'
+
+gem 'tty-prompt'   # For interactive command-line prompts
+gem 'tty-color'    # For coloring terminal output
+gem 'tty-spinner'  # For spinner animations in the terminal
+gem 'color'     # For coloring strings in the terminal
