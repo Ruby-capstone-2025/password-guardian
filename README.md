@@ -1,6 +1,6 @@
 # Password Guardian
 
-A simple Ruby CLI tool to evaluate password strength, check password breaches via the HaveIBeenPwned API, and generate or strengthen passwords.
+A Ruby CLI tool used to evaluate password strength, check password breaches via the HaveIBeenPwned API, and generate or strengthen passwords.
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ A simple Ruby CLI tool to evaluate password strength, check password breaches vi
    ```
 
 ## Running the Program
-
+Terminal Command:
 ```bash
 ruby cli_interface.rb
 ```
@@ -36,7 +36,7 @@ Enter 1, 2, 3, or 4:
 ## File Structure
 
 ```
-password_guardian/
+password_guardian
 ├── cli_interface.rb          # Main CLI entry point
 ├── password_strength.rb      # Password strength evaluation logic
 ├── PasswordSuggestion.rb     # Password strengthening & generation logic
