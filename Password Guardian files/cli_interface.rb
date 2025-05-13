@@ -11,6 +11,7 @@ class PasswordCLI
   def initialize
     @prompt = TTY::Prompt.new
     @pastel = Pastel.new
+    @breach_instance = Breach_Checker.new
   end
 
   def start
@@ -48,10 +49,9 @@ class PasswordCLI
   end
 
   def breach_flow
-    breach_instance = Breach_Checker.new
     pwd = @prompt.mask(@pastel.cyan("Enter password to check for breach:"), required: true)
     breaches = with_spinner("Checking breach…") do
-      breach_instance.check(pwd)
+      @breach_instance.check(pwd)
     end
 
     if breaches > 0

@@ -31,7 +31,7 @@ class Breach_Checker
       0     #if the code works but doesn't return any result up until this point Ruby defaults to return this 0
     rescue SocketError => e
       warn "Network error: #{e.message}"
-      nil
+      nil     #if the code block runs up to this point Ruby defaults to return this nil after giving a warning
     rescue HTTParty::Error => e
       warn "HTTParty error: #{e.message}"
       nil
