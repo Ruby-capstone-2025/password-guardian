@@ -5,7 +5,7 @@ require 'pastel'                  # for colored output
 
 require_relative 'password_strength'   # defines password_strength(password)
 require_relative 'PasswordSuggestion'  # defines strengthen_password(password), generate_password(length)
-# require_relative 'breach_checker'      # defines class BreachChecker#check_breach(password)
+require_relative 'Breach_Checker'      # defines class BreachChecker #check(password)
 
 class PasswordCLI
   def initialize
@@ -48,12 +48,13 @@ class PasswordCLI
   end
 
   def breach_flow
+    breach_instance = Breach_Checker.new
     pwd = @prompt.mask(@pastel.cyan("Enter password to check for breach:"), required: true)
     breaches = with_spinner("Checking breach…") do
-      BreachChecker.new.check_breach(pwd)
+      breach_instance.check(pwd)
     end
 
-    if breaches.to_i > 0
+    if breaches > 0
       puts @pastel.red("⚠️  Password found in #{breaches} known data breach(es)!")
     else
       puts @pastel.green("✅ Your password was NOT found in any known breach.")
