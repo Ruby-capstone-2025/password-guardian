@@ -1,7 +1,16 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    bigdecimal (3.1.9)
     color (1.8)
+    csv (3.3.4)
+    httparty (0.23.1)
+      csv
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
+    mini_mime (1.1.5)
+    multi_xml (0.7.2)
+      bigdecimal (~> 3.1)
     pastel (0.8.0)
       tty-color (~> 0.5)
     tty-color (0.6.0)
@@ -23,6 +32,7 @@ PLATFORMS
 
 DEPENDENCIES
   color
+  httparty
   tty-color
   tty-prompt
   tty-spinner
