@@ -3,9 +3,9 @@ require 'tty-prompt'              # for prompting input
 require 'tty-spinner'             # for spinner animations
 require 'pastel'                  # for colored output
 
-require_relative 'password_strength'   # defines top-level method password_strength(password)
-require_relative 'PasswordSuggestion'  # defines top-level methods strengthen_password(password), generate_password(length)
-require_relative 'breach_checker'      # defines class BreachChecker#check_breach(password)
+require_relative 'password_strength'   # defines password_strength(password)
+require_relative 'PasswordSuggestion'  # defines strengthen_password(password), generate_password(length)
+# require_relative 'breach_checker'      # defines class BreachChecker#check_breach(password)
 
 class PasswordCLI
   def initialize
@@ -15,93 +15,78 @@ class PasswordCLI
 
   def start
     loop do
-      puts @pastel.green("Welcome to Password Guardian!")
-      puts "Choose an option:"
-      puts "1) Password strength evaluator"
-      puts "2) Password breach check"
-      puts "3) Password suggestion engine"
-      puts "4) Quit"
-      print @pastel.cyan("Enter 1, 2, 3, or 4: ")
-      choice = STDIN.gets.chomp
+      @prompt.say(@pastel.green("\nWelcome to Password Guardian!"))
+      choice = @prompt.select("Choose an option:", cycle: true) do |menu|
+        menu.choice '🧪 Password strength evaluator', :strength
+        menu.choice '🛡️  Password breach check', :breach
+        menu.choice '🛠️  Password suggestion engine', :suggest
+        menu.choice '🚪 Quit', :quit
+      end
 
       case choice
-      when '1'
-        strength_flow
-      when '2'
-        breach_flow
-      when '3'
-        suggestion_flow
-      when '4'
+      when :strength then strength_flow
+      when :breach   then breach_flow
+      when :suggest  then suggestion_flow
+      when :quit
         puts @pastel.yellow("Goodbye!")
         break
-      else
-        puts @pastel.red("Invalid choice. Please enter 1, 2, 3, or 4.")
       end
-      puts  # blank line
+
+      puts
     end
   end
+
 
   private
 
   def strength_flow
-    pwd = @prompt.ask(@pastel.cyan("Enter password to evaluate:"))
-    score, entropy = nil, nil
+    pwd = @prompt.mask(@pastel.cyan("Enter password to evaluate:"), required: true)
+    score, entropy = with_spinner("Evaluating strength…") { password_strength(pwd) }
 
-    with_spinner("Evaluating strength…") do
-      score, entropy = password_strength(pwd)
-    end
-
-    puts @pastel.green("Password Score: #{score}/70")
-    puts @pastel.green("Password Entropy: #{entropy.round(2)} bits")
+    puts @pastel.green("✅ Password Score: #{score}/70")
+    puts @pastel.green("🔐 Password Entropy: #{entropy.round(2)} bits")
   end
 
   def breach_flow
-    pwd = @prompt.ask(@pastel.cyan("Enter password to check breach:"))
-    breaches = nil
-
-    with_spinner("Checking breach…") do
-      breaches = BreachChecker.new.check_breach(pwd)
+    pwd = @prompt.mask(@pastel.cyan("Enter password to check for breach:"), required: true)
+    breaches = with_spinner("Checking breach…") do
+      BreachChecker.new.check_breach(pwd)
     end
 
-    puts @pastel.red("Password breach count: #{breaches}")
+    if breaches.to_i > 0
+      puts @pastel.red("⚠️  Password found in #{breaches} known data breach(es)!")
+    else
+      puts @pastel.green("✅ Your password was NOT found in any known breach.")
+    end
   end
 
   def suggestion_flow
-    puts "Choose an option:"
-    puts "1) Strengthen an existing password"
-    puts "2) Generate a new random password"
-    print @pastel.cyan("Enter 1 or 2: ")
-    sub = STDIN.gets.chomp
+    sub_choice = @prompt.select(@pastel.cyan("Choose an option:"), cycle: true) do |menu|
+      menu.choice '🔧 Strengthen an existing password', :strengthen
+      menu.choice '🎲 Generate a new random password', :generate
+    end
 
-    case sub
-    when '1'
-      pwd = @prompt.ask(@pastel.cyan("Enter your current password:"))
-      new_pass = nil
-      with_spinner("Strengthening…") { new_pass = strengthen_password(pwd) }
-      puts @pastel.blue("Your strengthened password is: #{new_pass}")
+    case sub_choice
+    when :strengthen
+      pwd = @prompt.mask(@pastel.cyan("Enter your current password:"), required: true)
+      new_pass = with_spinner("Strengthening…") { strengthen_password(pwd) }
+      puts @pastel.blue("🔑 Your strengthened password is: #{new_pass}")
 
-    when '2'
-      len = @prompt.ask(
-        @pastel.cyan("Enter desired password length (default 16):"),
-        convert: :int,
-        default: 16
-      )
-      new_pass = nil
-      with_spinner("Generating…") { new_pass = generate_password(len) }
-      puts @pastel.blue("Your new password is: #{new_pass}")
-
-    else
-      puts @pastel.red("Invalid choice.")
+    when :generate
+      len = @prompt.ask(@pastel.cyan("Enter desired password length (default 16):"), convert: :int, default: 16)
+      new_pass = with_spinner("Generating…") { generate_password(len) }
+      puts @pastel.blue("🔑 Your new password is: #{new_pass}")
     end
   end
 
-  # spinner helper
+  # Spinner helper that returns block result
   def with_spinner(message)
     spinner = TTY::Spinner.new(@pastel.yellow("[:spinner] #{message}"), format: :pulse_2)
     spinner.auto_spin
-    sleep(1)  # simulate work; adjust/remove in production
+    result = yield
+    sleep(0.5) # Optional delay for UX
     spinner.stop(@pastel.green(" Done!"))
-    yield
+    result
   end
 end
 
